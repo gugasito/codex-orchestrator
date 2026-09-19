@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Orchestrator"
+  short_description: "Astra coordinates; Luna implements and verifies"
+  default_prompt: "Use $codex-orchestrator to plan with Astra and delegate bounded implementation and repetitive work to Luna."
