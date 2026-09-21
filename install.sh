@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: install.sh --dry-run|--copy [--target DIR]
+Usage: install.sh --dry-run|--copy [--update] [--target DIR]
 
 Install the Codex Orchestrator skill and Luna agents under DIR. DIR defaults to
 ${CODEX_HOME:-$HOME/.codex}; --target names the Codex configuration root,
@@ -13,6 +13,7 @@ USAGE
 
 mode=''
 target_root=''
+allow_update=false
 
 while (($#)); do
   case "$1" in
@@ -25,6 +26,9 @@ while (($#)); do
       [[ -n "$2" ]] || { echo '--target cannot be empty.' >&2; exit 64; }
       target_root="$2"
       shift
+      ;;
+    --update)
+      allow_update=true
       ;;
     --help|-h)
       usage
@@ -61,6 +65,8 @@ source_files=(
   '.codex/agents/luna-worker.toml'
   '.codex/agents/luna-repetitive.toml'
   '.codex/agents/luna-explorer.toml'
+  '.codex/agents/luna-deep-worker.toml'
+  '.codex/agents/luna-verifier.toml'
 )
 destination_files=(
   'skills/codex-orchestrator/SKILL.md'
@@ -68,6 +74,8 @@ destination_files=(
   'agents/luna-worker.toml'
   'agents/luna-repetitive.toml'
   'agents/luna-explorer.toml'
+  'agents/luna-deep-worker.toml'
+  'agents/luna-verifier.toml'
 )
 
 for relative_path in "${source_files[@]}"; do
@@ -130,7 +138,7 @@ done
 for index in "${!source_files[@]}"; do
   source_path="$repo_root/${source_files[$index]}"
   destination_path="$target_root/${destination_files[$index]}"
-  if [[ -e "$destination_path" ]] && ! cmp -s "$source_path" "$destination_path"; then
+  if [[ -e "$destination_path" ]] && ! cmp -s "$source_path" "$destination_path" && [[ "$allow_update" != true ]]; then
     echo "Destination differs from repository file: $destination_path" >&2
     exit 73
   fi
@@ -140,7 +148,11 @@ if [[ "$mode" == 'dry-run' ]]; then
   printf 'Would create directory: %s\n' "$target_root/skills/codex-orchestrator/agents"
   printf 'Would create directory: %s\n' "$target_root/agents"
   for index in "${!source_files[@]}"; do
-    printf 'Would copy: %s -> %s\n' "$repo_root/${source_files[$index]}" "$target_root/${destination_files[$index]}"
+    action='copy'
+    if [[ "$allow_update" == true && -e "$target_root/${destination_files[$index]}" ]]; then
+      action='update'
+    fi
+    printf 'Would %s: %s -> %s\n' "$action" "$repo_root/${source_files[$index]}" "$target_root/${destination_files[$index]}"
   done
   exit 0
 fi

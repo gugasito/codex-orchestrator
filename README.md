@@ -2,8 +2,8 @@
 
 Adaptación de [Fable orchestrator](https://github.com/codejunkie99/fable-orchestrator)
 para usar subagentes nativos de Codex con tus modelos. GPT-6 Astra dirige la
-tarea, toma decisiones y revisa el resultado; GPT-5.6 Luna realiza la
-implementación y el trabajo repetitivo. No requiere Claude CLI, Fable,
+tarea y toma decisiones; GPT-5.6 Luna realiza la implementación, verificación
+y el trabajo repetitivo. No requiere Claude CLI, Fable,
 OpenCode Go, un router externo ni claves adicionales de esos proveedores.
 
 ![Astra coordina y Luna implementa](assets/codex-orchestrator.svg)
@@ -14,10 +14,12 @@ OpenCode Go, un router externo ni claves adicionales de esos proveedores.
 | --- | --- |
 | `skill/codex-orchestrator/SKILL.md` | Flujo de planificación, delegación y verificación |
 | `skill/codex-orchestrator/agents/openai.yaml` | Nombre y prompt de la skill en Codex |
-| `.codex/config.toml` | Astra principal, Luna por defecto y hasta tres subagentes |
+| `.codex/config.toml` | Astra en `low`, Luna por defecto y hasta dos subagentes |
 | `.codex/agents/luna-worker.toml` | Implementación con Luna, razonamiento `medium` |
 | `.codex/agents/luna-repetitive.toml` | Trabajo mecánico con Luna, razonamiento `low` |
 | `.codex/agents/luna-explorer.toml` | Exploración de solo lectura con Luna, razonamiento `low` |
+| `.codex/agents/luna-deep-worker.toml` | Debugging e integración difícil con Luna, razonamiento `xhigh` |
+| `.codex/agents/luna-verifier.toml` | Verificación enfocada con Luna, razonamiento `high` |
 | `install.sh` | Instalación de la skill y los agentes personales |
 | `tests/test_skill.sh` | Pruebas locales del instalador |
 
@@ -41,9 +43,11 @@ Desde este repositorio:
 ```bash
 ./install.sh --dry-run
 ./install.sh --copy
+# To update an existing installation from this repository:
+./install.sh --copy --update
 ```
 
-Se copian la skill a `~/.codex/skills/codex-orchestrator` y los tres agentes
+Se copian la skill a `~/.codex/skills/codex-orchestrator` y los cinco agentes
 a `~/.codex/agents`. Si `CODEX_HOME` está definido, se usa esa raíz.
 El instalador conserva tu `config.toml`: los valores de `.codex/config.toml`
 incluidos aquí se aplican a este proyecto cuando Codex carga su configuración
@@ -53,14 +57,18 @@ Para otro destino usa `--target /ruta/a/codex`. **Ahora `--target` recibe la
 raíz de configuración de Codex, no el directorio `skills` del instalador Fable.**
 `--dry-run` no crea archivos. Repetir una instalación idéntica es válido;
 si un archivo de destino tiene cambios, el instalador se detiene antes de copiar
-para que puedas compararlo y conservar tus personalizaciones.
+para que puedas compararlo y conservar tus personalizaciones. Usa `--update`
+cuando quieras reemplazar los archivos administrados por esta versión; los
+archivos ajenos, incluido `config.toml`, no se modifican.
 
 Abre una nueva tarea después de instalar y selecciona **GPT-6 Astra** como
-modelo principal. Los agentes personalizados fijan Luna explícitamente, también
-cuando trabajas en otros proyectos. Si quieres los mismos valores por defecto
-en otro proyecto, integra las claves de `.codex/config.toml` en su configuración
-existente sin reemplazarla completa. La skill limita su flujo a tres subagentes;
-el límite de configuración también restringe la concurrencia en este proyecto.
+modelo principal. Astra queda en razonamiento `low` y funciona como controlador:
+planifica, crea agentes, espera resultados y resume. No debe leer el workspace,
+editar archivos, ejecutar comandos ni lanzar tests directamente. Los agentes
+personalizados fijan Luna explícitamente, también cuando trabajas en otros
+proyectos. Si quieres los mismos valores por defecto en otro proyecto, integra
+las claves de `.codex/config.toml` en su configuración existente sin reemplazarla
+completa. La skill limita su flujo a dos subagentes activos por defecto.
 
 ## Uso
 
@@ -69,9 +77,20 @@ $codex-orchestrator implementa esta funcionalidad con tests
 ```
 
 Astra define tareas acotadas, asigna archivos y criterios de aceptación, y
-delega a Luna. Puede ejecutar tareas independientes en paralelo. Después revisa
-los cambios y verifica el resultado integrado. Las tareas repetitivas tienen un
-límite de iteraciones y los bloqueos regresan al coordinador.
+delega todas las acciones a Luna. `luna_explorer` descubre el código;
+`luna_worker` implementa; `luna_repetitive` realiza transformaciones finitas;
+`luna_deep_worker` atiende debugging o integración compleja con `xhigh`, y
+`luna_verifier` ejecuta verificaciones enfocadas. Astra no ejecuta comandos ni
+edita archivos. Las tareas repetitivas tienen un límite de iteraciones y los
+bloqueos regresan al coordinador.
+
+Puedes pedir el esfuerzo explícitamente:
+
+```text
+$codex-orchestrator corrige este bug con Luna xhigh
+$codex-orchestrator migra estos archivos con Luna low
+$codex-orchestrator implementa la arquitectura con Luna max
+```
 
 Si los roles personalizados no aparecen, la skill puede usar una selección
 explícita de Luna cuando la herramienta nativa lo admita. Si tampoco existe esa
@@ -79,8 +98,11 @@ opción, informa del bloqueo. Nunca supone que una etiqueta de modelo garantiza
 que el modelo esté disponible, ni deja que un worker herede Astra por accidente.
 
 El ahorro depende del tamaño de las tareas y de cuánto se delegue: más agentes,
-contexto duplicado y reintentos pueden aumentar el consumo total. La revisión
-y coordinación de Astra siguen consumiendo sus recursos habituales.
+contexto duplicado y reintentos pueden aumentar el consumo total. La coordinación
+de Astra sigue consumiendo recursos, pero el trabajo operativo
+se desplaza a Luna. La skill no puede quitar técnicamente todas las herramientas
+del hilo principal; el modo controlador estricto es una frontera de instrucciones
+que el runtime debe respetar.
 
 ## Verificación
 
