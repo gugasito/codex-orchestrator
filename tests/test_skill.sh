@@ -32,12 +32,13 @@ for relative_path in "${source_files[@]}"; do
 done
 bash -n "$install_script"
 
-rg -Fq 'Astra must never edit' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'strict Astra boundary is missing'
+rg -Fq 'controller must never edit' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'strict controller boundary is missing'
 rg -Fq 'gpt-5.6-luna' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Luna routing is missing'
 rg -Fq 'luna_deep_worker' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'deep Luna role is missing'
 rg -Fq 'model_reasoning_effort = "xhigh"' "$repo_root/.codex/agents/luna-deep-worker.toml" || fail 'deep Luna effort is missing'
-rg -Fq 'model_reasoning_effort = "low"' "$repo_root/.codex/config.toml" || fail 'Astra low effort default is missing'
-rg -Fq 'model = "gpt-6-astra"' "$repo_root/.codex/config.toml" || fail 'Astra controller model is missing'
+rg -Fq 'model_reasoning_effort = "low"' "$repo_root/.codex/config.toml" || fail 'controller low effort default is missing'
+rg -Fq 'model = "gpt-5.6-sol"' "$repo_root/.codex/config.toml" || fail 'Sol controller model is missing'
+rg -Fq 'gpt-6-astra' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Astra controller option is missing'
 rg -Fq 'max_concurrent_threads_per_session = 2' "$repo_root/.codex/config.toml" || fail 'concurrency limit is missing'
 
 temp_root="$(mktemp -d "${TMPDIR:-/tmp}/fable-orchestrator.XXXXXX")"

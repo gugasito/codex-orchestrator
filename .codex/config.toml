@@ -1,5 +1,5 @@
-# Project defaults. Select GPT-6 Astra in the app as well if the task overrides it.
-model = "gpt-6-astra"
+# Project defaults. Sol is the default controller; GPT-6 Astra is also supported.
+model = "gpt-5.6-sol"
 model_reasoning_effort = "low"
 
 [agents]

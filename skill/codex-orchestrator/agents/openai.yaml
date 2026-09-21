@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Orchestrator"
-  short_description: "Astra coordinates; Luna performs every action"
-  default_prompt: "Use $codex-orchestrator to keep Astra as a strict controller and delegate implementation, verification, and repetitive work to Luna."
+  short_description: "Sol or Astra coordinates; Luna performs every action"
+  default_prompt: "Use $codex-orchestrator to keep Sol or Astra as a strict controller and delegate implementation, verification, and repetitive work to Luna."
