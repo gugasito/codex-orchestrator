@@ -1,12 +1,12 @@
-# Codex Orchestrator — Sol/Astra + Luna
+# Codex Orchestrator — Sol + Luna
 
 Adaptación de [Fable orchestrator](https://github.com/codejunkie99/fable-orchestrator)
-para usar subagentes nativos de Codex con tus modelos. GPT-5.6 Sol o GPT-6
-Astra dirigen la tarea y toman decisiones; GPT-5.6 Luna realiza la
+para usar subagentes nativos de Codex con tus modelos. GPT-6 Sol o GPT-6
+Astra dirigen la tarea y toman decisiones; GPT-6 Luna realiza la
 implementación, verificación y el trabajo repetitivo. No requiere Claude CLI, Fable,
 OpenCode Go, un router externo ni claves adicionales de esos proveedores.
 
-![Sol o Astra coordinan y Luna implementa](assets/codex-orchestrator.svg)
+![GPT-6 Sol coordina y GPT-6 Luna ejecuta y verifica](assets/codex-orchestrator.svg)
 
 ## Qué incluye
 
@@ -29,7 +29,7 @@ los archivos `.codex/agents/*.toml` definen los subagentes y sus modelos reales.
 ## Requisitos
 
 Necesitas una versión de Codex que admita subagentes personalizados y acceso
-a `gpt-5.6-sol`, `gpt-6-astra` y `gpt-5.6-luna` con tu autenticación de Codex. La skill no
+a `gpt-6-sol`, `gpt-6-astra` y `gpt-6-luna` con tu autenticación de Codex. La skill no
 concede acceso a modelos ni cambia el modelo de una sesión en curso.
 Los modelos y herramientas deben estar disponibles en la sesión real.
 
@@ -61,10 +61,10 @@ para que puedas compararlo y conservar tus personalizaciones. Usa `--update`
 cuando quieras reemplazar los archivos administrados por esta versión; los
 archivos ajenos, incluido `config.toml`, no se modifican.
 
-Abre una nueva tarea después de instalar y selecciona **GPT-5.6 Sol** o
+Abre una nueva tarea después de instalar y selecciona **GPT-6 Sol** o
 **GPT-6 Astra** como modelo principal. Sol queda seleccionado por defecto y
 funciona como controlador; Astra puede usarse como alternativa. El controlador
-queda en razonamiento `low`: planifica, crea agentes, espera resultados y resume.
+queda en razonamiento `medium`: planifica, crea agentes, espera resultados y resume.
 No debe leer el workspace, editar archivos, ejecutar comandos ni lanzar tests directamente. Los agentes
 personalizados fijan Luna explícitamente, también cuando trabajas en otros
 proyectos. Si quieres los mismos valores por defecto en otro proyecto, integra
@@ -77,13 +77,37 @@ completa. La skill limita su flujo a dos subagentes activos por defecto.
 $codex-orchestrator implementa esta funcionalidad con tests
 ```
 
-Sol o Astra definen tareas acotadas, asignan archivos y criterios de aceptación,
-y delegan todas las acciones a Luna. `luna_explorer` descubre el código;
+Sol define tareas acotadas, asigna archivos y criterios de aceptación, y delega
+todas las acciones a Luna. Astra queda como opción para tareas especialmente
+complejas. `luna_explorer` descubre el código;
 `luna_worker` implementa; `luna_repetitive` realiza transformaciones finitas;
 `luna_deep_worker` atiende debugging o integración compleja con `xhigh`, y
 `luna_verifier` ejecuta verificaciones enfocadas. El controlador no ejecuta
 comandos ni edita archivos. Las tareas repetitivas tienen un límite de
 iteraciones y los bloqueos regresan al coordinador.
+
+## Modelos y costo
+
+La configuración recomendada usa **GPT-6 Sol** para razonar, dividir el trabajo
+y consolidar resultados, y **GPT-6 Luna** para ejecutar todos los nodos. Ambos
+admiten razonamiento de `none` a `max`, entrada de texto e imagen, herramientas,
+una ventana de contexto de 1,05 millones de tokens y hasta 128 000 tokens de
+salida. Astra conserva el rol de alternativa para trabajo excepcionalmente
+difícil de principio a fin.
+
+Precios Standard de API por 1 millón de tokens, consultados el 22 de septiembre
+de 2026:
+
+| Modelo | Entrada | Entrada en caché | Escritura de caché | Salida |
+| --- | ---: | ---: | ---: | ---: |
+| GPT-6 Astra | US$10 | US$1 | US$12,50 | US$50 |
+| GPT-6 Sol | US$2 | US$0,20 | US$2,50 | US$10 |
+| GPT-6 Luna | US$0,10 | US$0,01 | US$0,125 | US$0,50 |
+
+En Codex con cobro por créditos, las tarifas correspondientes son 250/25/1250
+créditos para Astra, 50/5/250 para Sol y 2,5/0,25/12,5 para Luna por millón de
+tokens de entrada/entrada en caché/salida. Los planes incluidos tienen límites
+variables y no equivalen a un número fijo de mensajes.
 
 Puedes pedir el esfuerzo explícitamente:
 
@@ -101,7 +125,7 @@ controlador por accidente.
 
 El ahorro depende del tamaño de las tareas y de cuánto se delegue: más agentes,
 contexto duplicado y reintentos pueden aumentar el consumo total. La coordinación
-de Sol o Astra sigue consumiendo recursos, pero el trabajo operativo
+de Sol sigue consumiendo recursos, pero el trabajo operativo
 se desplaza a Luna. La skill no puede quitar técnicamente todas las herramientas
 del hilo principal; el modo controlador estricto es una frontera de instrucciones
 que el runtime debe respetar.
@@ -115,7 +139,7 @@ tests/test_skill.sh
 Las pruebas verifican el comportamiento del instalador en destinos temporales:
 simulación sin escrituras, copia fiel, repetición, conflictos y conservación de
 archivos ajenos. No prueban el descubrimiento de roles en la app ni el flujo
-completo con modelos. Para verificarlo, abre una nueva tarea con Sol o Astra e
+completo con modelos. Para verificarlo, abre una nueva tarea con Sol e
 invoca la skill con una tarea pequeña; comprueba que el subagente ejecutado usa Luna.
 
 ## Origen y documentación

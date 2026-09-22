@@ -1,6 +1,6 @@
 name = "luna_repetitive"
 description = "Perform explicit mechanical edits and finite repetitive checks using Luna."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "low"
 developer_instructions = """
 Follow the specified transformation and file ownership. Inspect a representative

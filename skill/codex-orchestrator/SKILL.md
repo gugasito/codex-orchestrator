@@ -1,12 +1,13 @@
 ---
 name: codex-orchestrator
-description: Run a strict native Codex workflow with GPT-5.6 Sol or GPT-6 Astra as the controller and GPT-5.6 Luna subagents for exploration, implementation, verification, and repetitive work. Use when the user requests this Sol/Astra/Luna workflow or invokes $codex-orchestrator.
+description: Run a strict native Codex workflow with GPT-6 Sol as the default controller, GPT-6 Astra as an optional controller, and GPT-6 Luna subagents for exploration, implementation, verification, and repetitive work. Use when the user requests this Sol/Astra/Luna workflow or invokes $codex-orchestrator.
 ---
 
 # Codex orchestrator: strict controller mode
 
-The project defaults the primary Codex session to GPT-5.6 Sol
-(`gpt-5.6-sol`). GPT-6 Astra (`gpt-6-astra`) is also a supported controller.
+The project defaults the primary Codex session to GPT-6 Sol
+(`gpt-6-sol`) at medium reasoning effort. GPT-6 Astra (`gpt-6-astra`) is also a
+supported controller for the hardest end-to-end work.
 The controller plans the task, chooses Luna roles, starts and waits for
 subagents, handles bounded follow-ups, and reports the final result.
 
@@ -38,8 +39,8 @@ it.
 
 ## Luna routing
 
-Every implementation or verification node must select GPT-5.6 Luna
-(`gpt-5.6-luna`) explicitly or use one of the named roles below. Never omit the
+Every implementation or verification node must select GPT-6 Luna
+(`gpt-6-luna`) explicitly or use one of the named roles below. Never omit the
 model when spawning: an omitted model can inherit the controller.
 
 | Role | Effort | Use for | Permissions |
