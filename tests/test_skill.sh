@@ -11,6 +11,13 @@ source_files=(
   '.codex/agents/luna-explorer.toml'
   '.codex/agents/luna-deep-worker.toml'
   '.codex/agents/luna-verifier.toml'
+  '.codex/agents/luna-infra.toml'
+  '.codex/agents/luna-backend.toml'
+  '.codex/agents/luna-frontend.toml'
+  '.codex/agents/luna-database.toml'
+  '.codex/agents/luna-qa.toml'
+  '.codex/agents/luna-security.toml'
+  '.codex/agents/luna-docs.toml'
 )
 destination_files=(
   'skills/codex-orchestrator/SKILL.md'
@@ -20,6 +27,13 @@ destination_files=(
   'agents/luna-explorer.toml'
   'agents/luna-deep-worker.toml'
   'agents/luna-verifier.toml'
+  'agents/luna-infra.toml'
+  'agents/luna-backend.toml'
+  'agents/luna-frontend.toml'
+  'agents/luna-database.toml'
+  'agents/luna-qa.toml'
+  'agents/luna-security.toml'
+  'agents/luna-docs.toml'
 )
 
 fail() {
@@ -33,13 +47,28 @@ done
 bash -n "$install_script"
 
 rg -Fq 'controller must never edit' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'strict controller boundary is missing'
-rg -Fq 'gpt-5.6-luna' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Luna routing is missing'
+rg -Fq 'gpt-6-luna' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Luna routing is missing'
+for role in worker repetitive explorer deep-worker verifier infra backend frontend database qa security docs; do
+  rg -Fq 'model = "gpt-6-luna"' "$repo_root/.codex/agents/luna-${role}.toml" || fail "Luna model is missing: $role"
+done
+rg -Fq 'luna_infra' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: infra'
+rg -Fq 'luna_backend' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: backend'
+rg -Fq 'luna_frontend' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: frontend'
+rg -Fq 'luna_database' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: database'
+rg -Fq 'luna_qa' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: qa'
+rg -Fq 'luna_security' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: security'
+rg -Fq 'luna_docs' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: docs'
+rg -Fq 'default_subagent_model = "gpt-6-luna"' "$repo_root/.codex/config.toml" || fail 'default subagent model is missing'
 rg -Fq 'luna_deep_worker' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'deep Luna role is missing'
 rg -Fq 'model_reasoning_effort = "xhigh"' "$repo_root/.codex/agents/luna-deep-worker.toml" || fail 'deep Luna effort is missing'
 rg -Fq 'model_reasoning_effort = "low"' "$repo_root/.codex/config.toml" || fail 'controller low effort default is missing'
-rg -Fq 'model = "gpt-5.6-sol"' "$repo_root/.codex/config.toml" || fail 'Sol controller model is missing'
+rg -Fq 'model = "gpt-6-sol"' "$repo_root/.codex/config.toml" || fail 'Sol controller model is missing'
 rg -Fq 'gpt-6-astra' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Astra controller option is missing'
-rg -Fq 'max_concurrent_threads_per_session = 2' "$repo_root/.codex/config.toml" || fail 'concurrency limit is missing'
+rg -Fq 'max_concurrent_threads_per_session = 4' "$repo_root/.codex/config.toml" || fail 'concurrency limit 4 is missing'
+rg -Fq 'at most four active nodes' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'skill concurrency 4 is missing'
+rg -Fq 'soft planning limits, not runtime enforcement' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'soft budget limitation is missing'
+rg -Fq 'Mark `complete` only when every acceptance' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'acceptance completion gate is missing'
+rg -Fq 'sandbox_mode = "read-only"' "$repo_root/.codex/agents/luna-security.toml" || fail 'security sandbox is not read-only'
 
 temp_root="$(mktemp -d "${TMPDIR:-/tmp}/fable-orchestrator.XXXXXX")"
 trap 'rm -rf "$temp_root"' EXIT

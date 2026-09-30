@@ -67,6 +67,13 @@ source_files=(
   '.codex/agents/luna-explorer.toml'
   '.codex/agents/luna-deep-worker.toml'
   '.codex/agents/luna-verifier.toml'
+  '.codex/agents/luna-infra.toml'
+  '.codex/agents/luna-backend.toml'
+  '.codex/agents/luna-frontend.toml'
+  '.codex/agents/luna-database.toml'
+  '.codex/agents/luna-qa.toml'
+  '.codex/agents/luna-security.toml'
+  '.codex/agents/luna-docs.toml'
 )
 destination_files=(
   'skills/codex-orchestrator/SKILL.md'
@@ -76,6 +83,13 @@ destination_files=(
   'agents/luna-explorer.toml'
   'agents/luna-deep-worker.toml'
   'agents/luna-verifier.toml'
+  'agents/luna-infra.toml'
+  'agents/luna-backend.toml'
+  'agents/luna-frontend.toml'
+  'agents/luna-database.toml'
+  'agents/luna-qa.toml'
+  'agents/luna-security.toml'
+  'agents/luna-docs.toml'
 )
 
 for relative_path in "${source_files[@]}"; do
