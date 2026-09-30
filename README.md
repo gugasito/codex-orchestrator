@@ -102,6 +102,29 @@ finitas; `luna_deep_worker` atiende debugging o integración compleja con
 ejecuta comandos ni edita archivos. Las tareas repetitivas tienen un límite de
 iteraciones y los bloqueos regresan al coordinador.
 
+## Modelos y costo
+
+La configuración recomendada usa **GPT-6 Sol** para razonar, dividir el trabajo
+y consolidar resultados, y **GPT-6 Luna** para ejecutar todos los nodos. Ambos
+admiten razonamiento de `none` a `max`, entrada de texto e imagen, herramientas,
+una ventana de contexto de 1,05 millones de tokens y hasta 128 000 tokens de
+salida. Astra conserva el rol de alternativa para trabajo excepcionalmente
+difícil de principio a fin.
+
+Precios Standard de API por 1 millón de tokens, consultados el 22 de septiembre
+de 2026:
+
+| Modelo | Entrada | Entrada en caché | Escritura de caché | Salida |
+| --- | ---: | ---: | ---: | ---: |
+| GPT-6 Astra | US$10 | US$1 | US$12,50 | US$50 |
+| GPT-6 Sol | US$2 | US$0,20 | US$2,50 | US$10 |
+| GPT-6 Luna | US$0,10 | US$0,01 | US$0,125 | US$0,50 |
+
+En Codex con cobro por créditos, las tarifas correspondientes son 250/25/1250
+créditos para Astra, 50/5/250 para Sol y 2,5/0,25/12,5 para Luna por millón de
+tokens de entrada/entrada en caché/salida. Los planes incluidos tienen límites
+variables y no equivalen a un número fijo de mensajes.
+
 Puedes pedir el esfuerzo explícitamente:
 
 ```text
