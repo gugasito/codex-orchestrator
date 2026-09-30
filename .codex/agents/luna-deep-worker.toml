@@ -2,6 +2,7 @@ name = "luna_deep_worker"
 description = "Solve difficult implementation, debugging, and integration tasks with Luna at high reasoning effort."
 model = "gpt-6-luna"
 model_reasoning_effort = "xhigh"
+sandbox_mode = "workspace-write"
 developer_instructions = """
 Own only the assigned task and file scope. Use deep reasoning to identify the
 real failure mode, choose the smallest defensible change, and verify it.
