@@ -1,171 +1,117 @@
-# Codex Orchestrator — selected controller + Luna
+# Codex Orchestrator — desarrollo adaptable con Sol y Luna
 
-Adaptación de [Fable orchestrator](https://github.com/codejunkie99/fable-orchestrator)
-para usar subagentes nativos de Codex con tus modelos. El modelo principal que
-seleccionaste dirige la tarea si el runtime ofrece delegación; GPT-6 Luna realiza la
-implementación, verificación y el trabajo repetitivo. No requiere Claude CLI, Fable,
-OpenCode Go, un router externo ni claves adicionales de esos proveedores.
-
-![El modelo seleccionado coordina y Luna implementa](assets/codex-orchestrator.svg)
-
-## Qué incluye
-
-| Componente | Función |
-| --- | --- |
-| `skill/codex-orchestrator/SKILL.md` | Flujo de planificación, delegación y verificación |
-| `skill/codex-orchestrator/agents/openai.yaml` | Nombre y prompt de la skill en Codex |
-| `.codex/config.toml` | Sol por defecto, Luna por defecto y hasta cuatro subagentes |
-| `.codex/agents/luna-worker.toml` | Implementación con Luna, razonamiento `medium` |
-| `.codex/agents/luna-repetitive.toml` | Trabajo mecánico con Luna, razonamiento `low` |
-| `.codex/agents/luna-explorer.toml` | Exploración de solo lectura con Luna, razonamiento `low` |
-| `.codex/agents/luna-deep-worker.toml` | Debugging e integración difícil con Luna, razonamiento `xhigh` |
-| `.codex/agents/luna-verifier.toml` | Verificación enfocada con Luna, razonamiento `high` |
-| `.codex/agents/luna-infra.toml` | Docker, infraestructura y CI/CD con Luna |
-| `.codex/agents/luna-backend.toml` | APIs, servicios y lógica de negocio con Luna |
-| `.codex/agents/luna-frontend.toml` | UI, estado cliente y accesibilidad con Luna |
-| `.codex/agents/luna-database.toml` | Esquema, migraciones e integridad de datos con Luna |
-| `.codex/agents/luna-qa.toml` | Estrategia de pruebas y regresiones con Luna |
-| `.codex/agents/luna-security.toml` | Threat modeling y revisión de seguridad read-only |
-| `.codex/agents/luna-docs.toml` | README, contratos y documentación técnica con Luna |
-| `install.sh` | Instalación de la skill y los agentes personales |
-| `tests/test_skill.sh` | Pruebas locales del instalador |
-
-Los archivos `agents/openai.yaml` de una skill son metadatos de interfaz;
-los archivos `.codex/agents/*.toml` definen los subagentes y sus modelos reales.
-
-## Requisitos
-
-Necesitas una versión de Codex que admita subagentes personalizados y acceso
-a `gpt-6-luna` con tu autenticación de Codex. La skill no
-concede acceso a modelos ni cambia el modelo de una sesión en curso.
-Los modelos y herramientas deben estar disponibles en la sesión real.
-
-El instalador usa Bash y utilidades estándar. Las pruebas usan además `rg`.
-No hacen llamadas a modelos ni requieren credenciales.
-
-## Instalación
-
-Desde este repositorio:
-
-```bash
-./install.sh --dry-run
-./install.sh --copy
-# To update an existing installation from this repository:
-./install.sh --copy --update
-```
-
-Se copian la skill a `~/.codex/skills/codex-orchestrator` y los doce agentes
-a `~/.codex/agents`. Si `CODEX_HOME` está definido, se usa esa raíz.
-El instalador conserva tu `config.toml`: los valores de `.codex/config.toml`
-incluidos aquí se aplican a este proyecto cuando Codex carga su configuración
-de proyecto de confianza, no automáticamente a todos tus proyectos.
-
-Para otro destino usa `--target /ruta/a/codex`. **Ahora `--target` recibe la
-raíz de configuración de Codex, no el directorio `skills` del instalador Fable.**
-`--dry-run` no crea archivos. Repetir una instalación idéntica es válido;
-si un archivo de destino tiene cambios, el instalador se detiene antes de copiar
-para que puedas compararlo y conservar tus personalizaciones. Usa `--update`
-cuando quieras reemplazar los archivos administrados por esta versión; los
-archivos ajenos, incluido `config.toml`, no se modifican.
-
-Abre una nueva tarea después de instalar. El modelo principal seleccionado por
-ti dirige como controlador cuando el runtime proporciona delegación. El proyecto
-conserva GPT-6 Sol como modelo predeterminado; GPT-6 Astra y GPT-6.1 Sol son
-ejemplos de otros modelos que pueden seleccionarse, sin garantizar que todos los
-modelos dispongan de herramientas de delegación. Si no están disponibles, la
-skill informa el bloqueo sin cambiar el modelo ni ejecutar el trabajo desde el
-controlador. El controlador
-queda en razonamiento `low`: planifica, crea agentes, espera resultados y resume.
-No debe leer el workspace, editar archivos, ejecutar comandos ni lanzar tests directamente. Los agentes
-personalizados fijan Luna explícitamente, también cuando trabajas en otros
-proyectos. Si quieres los mismos valores por defecto en otro proyecto, integra
-las claves de `.codex/config.toml` en su configuración existente sin reemplazarla
-completa. La skill limita su flujo a cuatro subagentes activos. Es un máximo,
-no un objetivo: los nodos solo se ejecutan en paralelo si sus scopes de escritura
-son disjuntos. Cambios que comparten archivos, contratos, migraciones o
-configuración raíz se serializan y cada ruta tiene un único owner. Todos los
-agentes de ejecución fijan GPT-6 Luna (`gpt-6-luna`).
+La skill convierte una solicitud de software en un cambio verificado, usando el
+modelo principal seleccionado para requisitos, decisiones e integración y Luna
+para implementación acotada cuando conviene delegar. Funciona con Codex nativo;
+no necesita ECC ni un servicio externo.
 
 ## Uso
 
 ```text
-$codex-orchestrator implementa esta funcionalidad con tests
+$codex-orchestrator agrega cancelación de pedidos respetando la arquitectura y UX del proyecto
 ```
 
-El modelo principal seleccionado define tareas acotadas, asigna archivos y criterios de aceptación,
-y delega todas las acciones a Luna. `luna_explorer` descubre el código;
-`luna_infra`, `luna_backend`, `luna_frontend`, `luna_database`, `luna_qa`,
-`luna_security` y `luna_docs` enrutan por dominio; `luna_worker` implementa
-cambios sin dominio específico; `luna_repetitive` realiza transformaciones
-finitas; `luna_deep_worker` atiende debugging o integración compleja con
-`xhigh`; y `luna_verifier` ejecuta verificaciones enfocadas. El controlador no
-ejecuta comandos ni edita archivos. Las tareas repetitivas tienen un límite de
-iteraciones y los bloqueos regresan al coordinador.
+El coordinador inspecciona, decide y revisa. Luna implementa por defecto, también
+las correcciones pequeñas. La edición funcional directa del principal requiere
+una excepción explicada; integración o tamaño pequeño no bastan. Una funcionalidad separable
+puede usar uno o dos workers. Los cambios críticos requieren revisión
+independiente del riesgo relevante. No hay una cadena obligatoria de explorador,
+implementador, QA y verificador.
 
-## Modelos y costo
+Se recomienda GPT-6.1 Sol como principal. La selección activa del usuario manda:
+la skill no cambia el modelo ni el esfuerzo de una sesión abierta. Los defaults
+del proyecto son Sol medium, Luna medium y un máximo de tres subagentes; el
+runtime puede imponer un límite menor. El instalador conserva el config global.
 
-La configuración recomendada usa **GPT-6 Sol** para razonar, dividir el trabajo
-y consolidar resultados, y **GPT-6 Luna** para ejecutar todos los nodos. Ambos
-admiten razonamiento de `none` a `max`, entrada de texto e imagen, herramientas,
-una ventana de contexto de 1,05 millones de tokens y hasta 128 000 tokens de
-salida. Astra conserva el rol de alternativa para trabajo excepcionalmente
-difícil de principio a fin.
+## Instalación y actualización
 
-Precios Standard de API por 1 millón de tokens, consultados el 22 de septiembre
-de 2026:
-
-| Modelo | Entrada | Entrada en caché | Escritura de caché | Salida |
-| --- | ---: | ---: | ---: | ---: |
-| GPT-6 Astra | US$10 | US$1 | US$12,50 | US$50 |
-| GPT-6 Sol | US$2 | US$0,20 | US$2,50 | US$10 |
-| GPT-6 Luna | US$0,10 | US$0,01 | US$0,125 | US$0,50 |
-
-En Codex con cobro por créditos, las tarifas correspondientes son 250/25/1250
-créditos para Astra, 50/5/250 para Sol y 2,5/0,25/12,5 para Luna por millón de
-tokens de entrada/entrada en caché/salida. Los planes incluidos tienen límites
-variables y no equivalen a un número fijo de mensajes.
-
-Puedes pedir el esfuerzo explícitamente:
-
-```text
-$codex-orchestrator corrige este bug con Luna xhigh
-$codex-orchestrator migra estos archivos con Luna low
-$codex-orchestrator implementa la arquitectura con Luna max
+```bash
+./install.sh --dry-run
+./install.sh --copy
+# Actualizar una instalación existente, tras revisar diferencias:
+./install.sh --dry-run --update
+./install.sh --copy --update
 ```
 
-Si los roles personalizados no aparecen, la skill puede usar una selección
-explícita de Luna cuando la herramienta nativa lo admita. Si tampoco existe esa
-opción, informa del bloqueo. Nunca supone que una etiqueta de modelo garantiza
-que el modelo esté disponible, ni deja que un worker herede el modelo del
-controlador por accidente.
+El destino es `${CODEX_HOME:-$HOME/.codex}`; `--target DIR` permite otra raíz de
+configuración. Se instalan la skill, sus referencias y quince agentes. No se
+modifica `config.toml` ni se eliminan archivos ajenos. Sin `--update`, un archivo
+diferente bloquea la copia antes de escribir; `--update` reemplaza los archivos
+administrados. Conserva una copia de tus personalizaciones antes de actualizar.
+Abre un chat nuevo para que Codex descubra las instrucciones y roles actualizados.
 
-El ahorro depende del tamaño de las tareas y de cuánto se delegue: más agentes,
-contexto duplicado y reintentos pueden aumentar el consumo total. La coordinación
-del modelo principal sigue consumiendo recursos, pero el trabajo operativo
-se desplaza a Luna. La skill no puede quitar técnicamente todas las herramientas
-del hilo principal; el modo controlador estricto es una frontera de instrucciones
-que el runtime debe respetar.
+La disponibilidad real de modelos y delegación depende de tu sesión. Si falta
+un rol, el coordinador puede usar selección explícita cuando la herramienta la
+admita. Si falta delegación, puede continuar directamente salvo que tu pedido
+exija una separación estricta de modelos. No afirma haber delegado si no ocurrió.
+
+## Roles y esfuerzo
+
+Los doce roles Luna existentes se conservan: explorer, repetitive, worker,
+deep_worker, verifier, infra, backend, frontend, database, qa, security y docs,
+todos con prefijo `luna_`. Se añaden `sol_specialist`, `sol_reviewer` y
+`astra_specialist` para escalamiento justificado. No se activan todos a la vez.
+
+El dominio y el modelo son decisiones distintas. Los archivos de agentes fijan
+modelo y esfuerzo; para otra combinación se necesita un spawn explícito
+compatible o un rol adecuado. La tabla completa está en
+[la referencia de routing](skill/codex-orchestrator/references/routing.md).
+No se garantiza ahorro por tarea: deben medirse coordinación, reintentos y
+calidad. Más tokens Luna pueden costar menos que menos tokens Sol.
+
+## Arquitectura, UX y aprendizaje
+
+La skill consulta documentación y código reales. Si faltan instrucciones durante
+una tarea de desarrollo, prepara un AGENTS.md breve y basado en evidencia, sin
+sobrescribir las reglas existentes. Incluye instrucciones por ámbito en cada delegación. Para trabajo recurrente puede
+mantener un índice `.codex/knowledge/index.md` dentro del proyecto que enlaza las
+fuentes existentes. Esa ruta es una convención que la skill lee explícitamente,
+no una función automática de Codex.
+
+- Backend: límites de módulos, contratos, autorización, transacciones e invariantes.
+- UX: componentes y tokens existentes, estados, navegación, accesibilidad y evidencia visual.
+- Lecciones: situación, acción propuesta, alcance, evidencia, fecha y estado.
+- Métricas: tiempo y consumo observados; valores desconocidos quedan sin inventar.
+
+Los aprendizajes son locales al proyecto. Una observación no se convierte en
+regla global; la promoción global requiere mantenimiento explícito. No hay
+observadores en segundo plano ni modificación automática de la skill instalada.
+Las referencias se cargan según necesidad, no todas para cada solicitud.
 
 ## Verificación
 
 ```bash
-tests/test_skill.sh
+bash tests/test_skill.sh
+python3 tests/test_package.py
 ```
 
-Las pruebas verifican el comportamiento del instalador en destinos temporales:
-simulación sin escrituras, copia fiel, repetición, conflictos y conservación de
-archivos ajenos. No prueban el descubrimiento de roles en la app ni el flujo
-completo con modelos. Para verificarlo, abre una nueva tarea con un modelo que
-disponga de delegación nativa e
-invoca la skill con una tarea pequeña; comprueba que el subagente ejecutado usa Luna.
+Los tests verifican instalación, actualización, idempotencia, protección frente
+a conflictos/enlaces y distribución de referencias/agentes. La validación de
+paquete requiere Python 3.11+ (tomllib). No son benchmarks con modelos.
 
-## Origen y documentación
+[Los escenarios de evaluación](tests/workflow-scenarios.md) permiten probar el
+flujo. Para medir mejoras, compara el mismo caso y commit entre modelo solo,
+versión anterior y versión nueva en espacios aislados. Incluye fallos, retrabajo,
+calidad arquitectónica y UX. No atribuyas a la nueva skill ganancias que aún no
+se han medido.
 
-La versión original se conserva en el historial Git (commit `e6345e5`). Esta
-variante reemplaza la skill `fable` y el helper `ask_fable.sh`; no ejecuta ni
-instala el flujo anterior. El instalador tampoco elimina instalaciones previas
-de Fable que puedas tener fuera del repositorio.
+## Compatibilidad y origen
 
-Configuración basada en la [documentación oficial de subagentes de Codex](https://developers.openai.com/es-419/docs/agent-configuration/subagents).
+Esta versión sustituye el modo controlador estricto por coordinación adaptable.
+Conserva roles Luna y permisos existentes; los roles read-only declaran además
+su restricción de no editar. Los overrides del runtime pueden prevalecer sobre
+los valores de sandbox de los archivos.
 
-Licencia MIT; se conserva [LICENSE](LICENSE) del proyecto original.
+Basado en [subagentes oficiales de Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents).
+Adaptado originalmente de [Fable Orchestrator](https://github.com/codejunkie99/fable-orchestrator).
+Licencia MIT, ver [LICENSE](LICENSE). El historial conserva la versión anterior.
+
+## Flujo recomendado
+
+Inicia cada proyecto definiendo alcance y criterios de aceptación. Usa un chat
+por funcionalidad y conserva el mismo para sus correcciones. Pide el resultado
+y sus restricciones; la skill elige los agentes. Evita chats escribiendo archivos
+compartidos en paralelo. Al cerrar, revisa quién implementó, las verificaciones
+y las excepciones. Tras instalar, abre un chat nuevo y pide listar instrucciones
+y delegación prevista. Los archivos AGENTS.md del proyecto se mantienen con él;
+el AGENTS.md de este repositorio solo orienta el mantenimiento de la skill.

@@ -1,9 +1,11 @@
-# Project defaults. Sol is the default controller; GPT-6 Astra is also supported.
-model = "gpt-6-sol"
-model_reasoning_effort = "low"
+# Project defaults only; installation preserves the user's global config.
+# The active user-selected model remains authoritative.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
 
 [agents]
 enabled = true
-max_concurrent_threads_per_session = 4
+# This setting excludes the primary; obey lower live runtime limits too.
+max_concurrent_threads_per_session = 3
 default_subagent_model = "gpt-6-luna"
-default_subagent_reasoning_effort = "low"
+default_subagent_reasoning_effort = "medium"
