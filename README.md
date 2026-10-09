@@ -1,5 +1,7 @@
 # Codex Orchestrator — desarrollo adaptable con Sol y Luna
 
+![Flujo de Codex Orchestrator: Sol coordina, Luna implementa y prueba, y Sol revisa; las correcciones vuelven a Luna.](assets/codex-orchestrator-workflow-warm.png)
+
 La skill convierte una solicitud de software en un cambio verificado, usando el
 modelo principal seleccionado para requisitos, decisiones e integración y Luna
 para implementación acotada cuando conviene delegar. Funciona con Codex nativo;
