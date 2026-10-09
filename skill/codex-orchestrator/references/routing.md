@@ -37,7 +37,9 @@ Escalation examples:
   if available and consistent with the user's cost constraints.
 - Tests cannot connect to a service: diagnose environment; report blocked checks.
 
-If an optional role is absent, use the controller or supported explicit-model
-spawn; report limitations. Never silently substitute a more expensive model
+If a named Luna role is absent, first use a supported explicit Luna spawn with
+the domain contract. If Luna delegation itself is unavailable, report it and
+apply the entrypoint's exception/strict-model policy. Absence of an optional
+specialist is not permission to bypass the default Luna implementation route. Never silently substitute a more expensive model
 when the user has set a model/cost constraint. Price and availability are not
 hard-coded guarantees. Record actual model, effort, and usage when exposed.

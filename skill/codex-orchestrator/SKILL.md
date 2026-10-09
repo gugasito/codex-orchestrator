@@ -8,13 +8,25 @@ description: Coordinate software development with the selected primary model and
 The selected primary model owns requirements, technical decisions, integration,
 and acceptance. Recommend GPT-6.1 Sol for this role, but never switch the user's
 active model or claim a skill can change its reasoning setting. The controller
-may inspect code, edit, run checks, and resolve integration directly. Delegate
-bounded implementation to GPT-6 Luna when it saves expected cost or time.
+inspects code, makes decisions, defines contracts and reviews evidence. Delegate
+implementation to GPT-6 Luna by default, including small code and UI changes.
+This is a cost-oriented policy, not a guarantee of lowest latency or cost.
+Direct controller implementation is an exception: explicit user request,
+verified delegation unavailability when direct fallback is allowed, or a bounded
+problem that remains difficult after a focused Luna correction. State the reason
+and scope before taking over and in the final report. Small size or the label
+"integration" alone is not an exception. Controller-authored plans, task contracts,
+and project guidance are allowed; functional code, tests, configuration and routine
+documentation belong to the assigned worker. Never edit a worker-owned path while
+that worker is active; transfer ownership explicitly before an exception.
 
 ## Establish the task
 
 Read applicable AGENTS.md instructions and inspect the relevant implementation
-and existing tests. Reuse evidence already gathered. Delegate broad or noisy
+and existing tests. Reuse evidence already gathered. If project guidance is
+missing or materially insufficient during a development request, read
+[project-setup.md](references/project-setup.md) and establish concise evidence-based
+instructions before implementation. Do not bootstrap files for a read-only question. Delegate broad or noisy
 exploration to `luna_explorer`; do not create an explorer for known paths.
 Express the intended behavior, acceptance examples, constraints, and relevant
 contracts briefly. Ask only about uncertainty that materially changes the
@@ -27,12 +39,13 @@ and linked project evidence, not the entire reference library.
 
 | Route | Trigger | Execution and verification |
 | --- | --- | --- |
-| Fast | Localized, understood, low-risk change | Controller directly or one Luna owner; focused verification by owner, no mandatory explorer or QA node |
+| Fast | Localized, understood, low-risk change | One Luna owner implements and performs focused checks; controller reviews, no mandatory explorer or QA node |
 | Normal | Feature with separable implementation scopes | Controller defines contracts; one or two domain workers, parallel only when independent; controller integrates and checks acceptance |
 | Critical | Authorization, sensitive data integrity, destructive migration, or consequential cross-module design | Controller reasons through invariants; bounded implementation; independent review of the material risk and integration evidence |
 
 These are routing defaults, not fixed ceremonies. Estimate whether delegation
-saves more work than its context and handoff overhead. Preserve the user's
+saves more work than its context and handoff overhead when choosing worker count
+and context scope; this estimate does not create a direct-implementation exception. Preserve the user's
 explicit model, effort, cost, or delegation constraints. No recurring observer,
 background work, external service, or ECC dependency is required.
 
@@ -47,7 +60,7 @@ Named agents have fixed model/effort settings; choose a suitable role or an
 explicit-model spawn when supported instead of claiming to override the role.
 Never accidentally inherit the primary model for a Luna assignment.
 
-The controller can handle difficult work itself. `sol_specialist` and
+The controller can handle difficult implementation under the explicit exception policy above. `sol_specialist` and
 `sol_reviewer` are optional GPT-6.1 Sol roles; `astra_specialist` is reserved for
 exceptionally difficult reasoning with a concrete escalation reason. Do not
 escalate an environment failure to a more expensive model.
@@ -57,7 +70,8 @@ Do not claim a configured model is callable until the runtime supports it.
 
 ## Delegate with a compact contract
 
-Include objective, owned paths/read scope, relevant architecture/UX references,
+Include objective, owned paths/read scope, applicable root and nested instruction
+files (check overrides), relevant architecture/UX references,
 acceptance criteria, required verification, dependencies, and a stop condition.
 Workers are not alone: preserve other edits, report ownership overlaps, and do
 not expand scope or spawn descendants. Prefer context-free forks with only the
@@ -77,11 +91,15 @@ stop useful authorized work solely to satisfy a timebox.
 
 ## Correct, verify, and finish
 
+Return actionable implementation findings to the same Luna owner first, including
+expected behavior and failing evidence. Do not silently fix them in the primary.
+If that worker is unavailable, assign a replacement Luna with the existing context.
 After a failure, identify missing context, a local defect, a reasoning problem,
 or an environment blocker. Attempt one focused repair by the owner only when a plausible repair exists;
 skip retries while a known missing prerequisite remains unavailable; if the same
 failure persists, the controller diagnoses and changes approach, handles it
-directly, or escalates the bounded problem. Avoid repeated blind retries.
+directly only under the implementation exception policy above, or escalates the
+bounded problem. Avoid repeated blind retries.
 
 Verification is selected by risk, never required merely because a domain role
 was used. Low-risk changes use owner evidence. Critical changes need an
@@ -92,6 +110,8 @@ Re-run affected checks after integration edits; do not repeat unchanged suites.
 
 Each worker returns status (complete/incomplete/blocked), changed paths,
 checks and results, unresolved risks, and the next decision if needed.
+The final report names actual implementers and reviewers, checks, remaining gaps,
+and any direct-controller implementation with its reason. Report only known usage.
 The controller checks acceptance against code and evidence, including integration;
 a worker's summary alone is not proof. Report incomplete checks honestly.
 If critical work cannot obtain independent review, authorized implementation may

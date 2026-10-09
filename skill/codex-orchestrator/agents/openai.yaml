@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Orchestrator"
-  short_description: "Adaptive Sol/Luna development with project architecture and UX"
-  default_prompt: "Use $codex-orchestrator to understand this software change, delegate focused work to Luna when useful, and verify the result against project architecture and UX."
+  short_description: "Luna-first implementation with architecture and UX guidance"
+  default_prompt: "Use $codex-orchestrator to understand this software change, delegate implementation to Luna by default, including small changes, and verify the result against project architecture and UX."

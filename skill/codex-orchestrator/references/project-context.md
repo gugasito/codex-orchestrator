@@ -1,6 +1,7 @@
 # Project architecture and UX
 
-Use existing project documentation first. Project AGENTS.md and explicit user
+Use existing project documentation first. For missing guidance, follow
+[project-setup.md](project-setup.md). Project AGENTS.md and explicit user
 requirements take precedence over this skill's defaults. Proposed knowledge
 paths are conventions, not runtime-loaded magic. The controller must explicitly
 read the relevant files and include their paths/evidence in worker contracts.

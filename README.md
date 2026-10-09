@@ -11,8 +11,9 @@ no necesita ECC ni un servicio externo.
 $codex-orchestrator agrega cancelación de pedidos respetando la arquitectura y UX del proyecto
 ```
 
-El coordinador puede leer, editar y comprobar código. Una corrección pequeña
-puede resolverse directamente o con un solo Luna. Una funcionalidad separable
+El coordinador inspecciona, decide y revisa. Luna implementa por defecto, también
+las correcciones pequeñas. La edición funcional directa del principal requiere
+una excepción explicada; integración o tamaño pequeño no bastan. Una funcionalidad separable
 puede usar uno o dos workers. Los cambios críticos requieren revisión
 independiente del riesgo relevante. No hay una cadena obligatoria de explorador,
 implementador, QA y verificador.
@@ -60,7 +61,9 @@ calidad. Más tokens Luna pueden costar menos que menos tokens Sol.
 
 ## Arquitectura, UX y aprendizaje
 
-La skill consulta documentación y código reales. Para trabajo recurrente puede
+La skill consulta documentación y código reales. Si faltan instrucciones durante
+una tarea de desarrollo, prepara un AGENTS.md breve y basado en evidencia, sin
+sobrescribir las reglas existentes. Incluye instrucciones por ámbito en cada delegación. Para trabajo recurrente puede
 mantener un índice `.codex/knowledge/index.md` dentro del proyecto que enlaza las
 fuentes existentes. Esa ruta es una convención que la skill lee explícitamente,
 no una función automática de Codex.
@@ -102,3 +105,13 @@ los valores de sandbox de los archivos.
 Basado en [subagentes oficiales de Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents).
 Adaptado originalmente de [Fable Orchestrator](https://github.com/codejunkie99/fable-orchestrator).
 Licencia MIT, ver [LICENSE](LICENSE). El historial conserva la versión anterior.
+
+## Flujo recomendado
+
+Inicia cada proyecto definiendo alcance y criterios de aceptación. Usa un chat
+por funcionalidad y conserva el mismo para sus correcciones. Pide el resultado
+y sus restricciones; la skill elige los agentes. Evita chats escribiendo archivos
+compartidos en paralelo. Al cerrar, revisa quién implementó, las verificaciones
+y las excepciones. Tras instalar, abre un chat nuevo y pide listar instrucciones
+y delegación prevista. Los archivos AGENTS.md del proyecto se mantienen con él;
+el AGENTS.md de este repositorio solo orienta el mantenimiento de la skill.
