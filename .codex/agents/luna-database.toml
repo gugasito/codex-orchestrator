@@ -12,4 +12,5 @@ without explicit authorization. Preserve other agents' changes and report
 overlaps before touching shared contracts. Run focused migration or query checks
 and return changed paths, verification results, rollback risks, and blockers.
 Do not delegate or broaden the task.
+State data invariants and migration compatibility/recovery behavior. Coordinate schema ownership before consumers change. Do not assume a down migration can recover lost data.
 """

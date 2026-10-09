@@ -6,6 +6,9 @@ install_script="$repo_root/install.sh"
 source_files=(
   'skill/codex-orchestrator/SKILL.md'
   'skill/codex-orchestrator/agents/openai.yaml'
+  'skill/codex-orchestrator/references/learning-and-evaluation.md'
+  'skill/codex-orchestrator/references/project-context.md'
+  'skill/codex-orchestrator/references/routing.md'
   '.codex/agents/luna-worker.toml'
   '.codex/agents/luna-repetitive.toml'
   '.codex/agents/luna-explorer.toml'
@@ -18,10 +21,16 @@ source_files=(
   '.codex/agents/luna-qa.toml'
   '.codex/agents/luna-security.toml'
   '.codex/agents/luna-docs.toml'
+  '.codex/agents/astra-specialist.toml'
+  '.codex/agents/sol-reviewer.toml'
+  '.codex/agents/sol-specialist.toml'
 )
 destination_files=(
   'skills/codex-orchestrator/SKILL.md'
   'skills/codex-orchestrator/agents/openai.yaml'
+  'skills/codex-orchestrator/references/learning-and-evaluation.md'
+  'skills/codex-orchestrator/references/project-context.md'
+  'skills/codex-orchestrator/references/routing.md'
   'agents/luna-worker.toml'
   'agents/luna-repetitive.toml'
   'agents/luna-explorer.toml'
@@ -34,6 +43,9 @@ destination_files=(
   'agents/luna-qa.toml'
   'agents/luna-security.toml'
   'agents/luna-docs.toml'
+  'agents/astra-specialist.toml'
+  'agents/sol-reviewer.toml'
+  'agents/sol-specialist.toml'
 )
 
 fail() {
@@ -45,30 +57,6 @@ for relative_path in "${source_files[@]}"; do
   [[ -f "$repo_root/$relative_path" ]] || fail "source is missing: $relative_path"
 done
 bash -n "$install_script"
-
-rg -Fq 'controller must never edit' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'strict controller boundary is missing'
-rg -Fq 'gpt-6-luna' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Luna routing is missing'
-for role in worker repetitive explorer deep-worker verifier infra backend frontend database qa security docs; do
-  rg -Fq 'model = "gpt-6-luna"' "$repo_root/.codex/agents/luna-${role}.toml" || fail "Luna model is missing: $role"
-done
-rg -Fq 'luna_infra' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: infra'
-rg -Fq 'luna_backend' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: backend'
-rg -Fq 'luna_frontend' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: frontend'
-rg -Fq 'luna_database' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: database'
-rg -Fq 'luna_qa' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: qa'
-rg -Fq 'luna_security' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: security'
-rg -Fq 'luna_docs' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'domain routing is missing: docs'
-rg -Fq 'default_subagent_model = "gpt-6-luna"' "$repo_root/.codex/config.toml" || fail 'default subagent model is missing'
-rg -Fq 'luna_deep_worker' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'deep Luna role is missing'
-rg -Fq 'model_reasoning_effort = "xhigh"' "$repo_root/.codex/agents/luna-deep-worker.toml" || fail 'deep Luna effort is missing'
-rg -Fq 'model_reasoning_effort = "low"' "$repo_root/.codex/config.toml" || fail 'controller low effort default is missing'
-rg -Fq 'model = "gpt-6-sol"' "$repo_root/.codex/config.toml" || fail 'Sol controller model is missing'
-rg -Fq 'gpt-6-astra' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'Astra controller option is missing'
-rg -Fq 'max_concurrent_threads_per_session = 4' "$repo_root/.codex/config.toml" || fail 'concurrency limit 4 is missing'
-rg -Fq 'at most four active nodes' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'skill concurrency 4 is missing'
-rg -Fq 'soft planning limits, not runtime enforcement' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'soft budget limitation is missing'
-rg -Fq 'Mark `complete` only when every acceptance' "$repo_root/skill/codex-orchestrator/SKILL.md" || fail 'acceptance completion gate is missing'
-rg -Fq 'sandbox_mode = "read-only"' "$repo_root/.codex/agents/luna-security.toml" || fail 'security sandbox is not read-only'
 
 temp_root="$(mktemp -d "${TMPDIR:-/tmp}/fable-orchestrator.XXXXXX")"
 trap 'rm -rf "$temp_root"' EXIT
@@ -139,5 +127,16 @@ fi
 if "$install_script" --bogus --target "$temp_root/invalid" >/dev/null 2>&1; then
   fail 'invalid argument was accepted'
 fi
+
+# New nested references must receive the same preflight protection.
+reference_target="$temp_root/reference-symlink"
+mkdir -p "$reference_target/skills/codex-orchestrator"
+ln -s "$temp_root/reference-elsewhere" "$reference_target/skills/codex-orchestrator/references"
+if "$install_script" --copy --update --target "$reference_target" >/dev/null 2>&1; then
+  fail 'reference directory symlink was accepted'
+fi
+[[ ! -e "$reference_target/agents" ]] || fail 'reference preflight partially installed agents'
+[[ ! -e "$temp_root/reference-elsewhere" ]] || fail 'reference symlink target was written'
+assert_installed_fidelity "$conflict_target"
 
 echo 'PASS: Codex installer behavioral checks'

@@ -5,7 +5,7 @@ usage() {
   cat <<'USAGE'
 Usage: install.sh --dry-run|--copy [--update] [--target DIR]
 
-Install the Codex Orchestrator skill and Luna agents under DIR. DIR defaults to
+Install the Codex Orchestrator skill and specialized agents under DIR. DIR defaults to
 ${CODEX_HOME:-$HOME/.codex}; --target names the Codex configuration root,
 not the skills directory itself.
 USAGE
@@ -62,6 +62,9 @@ repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 source_files=(
   'skill/codex-orchestrator/SKILL.md'
   'skill/codex-orchestrator/agents/openai.yaml'
+  'skill/codex-orchestrator/references/learning-and-evaluation.md'
+  'skill/codex-orchestrator/references/project-context.md'
+  'skill/codex-orchestrator/references/routing.md'
   '.codex/agents/luna-worker.toml'
   '.codex/agents/luna-repetitive.toml'
   '.codex/agents/luna-explorer.toml'
@@ -74,10 +77,16 @@ source_files=(
   '.codex/agents/luna-qa.toml'
   '.codex/agents/luna-security.toml'
   '.codex/agents/luna-docs.toml'
+  '.codex/agents/astra-specialist.toml'
+  '.codex/agents/sol-reviewer.toml'
+  '.codex/agents/sol-specialist.toml'
 )
 destination_files=(
   'skills/codex-orchestrator/SKILL.md'
   'skills/codex-orchestrator/agents/openai.yaml'
+  'skills/codex-orchestrator/references/learning-and-evaluation.md'
+  'skills/codex-orchestrator/references/project-context.md'
+  'skills/codex-orchestrator/references/routing.md'
   'agents/luna-worker.toml'
   'agents/luna-repetitive.toml'
   'agents/luna-explorer.toml'
@@ -90,6 +99,9 @@ destination_files=(
   'agents/luna-qa.toml'
   'agents/luna-security.toml'
   'agents/luna-docs.toml'
+  'agents/astra-specialist.toml'
+  'agents/sol-reviewer.toml'
+  'agents/sol-specialist.toml'
 )
 
 for relative_path in "${source_files[@]}"; do
@@ -173,7 +185,8 @@ fi
 
 mkdir -p "$target_root/skills/codex-orchestrator/agents" "$target_root/agents"
 for index in "${!source_files[@]}"; do
+  mkdir -p "$(dirname -- "$target_root/${destination_files[$index]}")"
   cp "$repo_root/${source_files[$index]}" "$target_root/${destination_files[$index]}"
 done
 
-printf 'Installed Codex Orchestrator skill and Luna agents under %s\n' "$target_root"
+printf 'Installed Codex Orchestrator skill and specialized agents under %s\n' "$target_root"

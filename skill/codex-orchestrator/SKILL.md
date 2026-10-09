@@ -1,187 +1,104 @@
 ---
 name: codex-orchestrator
-description: Run a strict native Codex workflow with the user's selected primary model as controller when native delegation is available, and GPT-6 Luna subagents for exploration, implementation, verification, and repetitive work. Use when the user requests this Sol/Astra/Luna workflow or invokes $codex-orchestrator.
+description: Coordinate software development with the selected primary model and focused Luna subagents, adapting delegation to complexity and risk while preserving project architecture and UX. Use for the Sol/Luna development workflow or an explicit codex-orchestrator request.
 ---
 
-# Codex orchestrator: strict controller mode
+# Adaptive Codex Orchestrator
 
-The project defaults the primary Codex session to GPT-6 Sol
-(`gpt-6-sol`). The active model selected by the user for the current Codex
-session is the authoritative controller. Respect that selection; do not ask the
-user to switch models by name. Models such as GPT-6 Sol (`gpt-6-sol`), GPT-6
-Astra (`gpt-6-astra`), and GPT-6.1 Sol (`gpt-6.1-sol`) are examples, not an
-exhaustive compatibility list. This workflow requires the runtime to provide
-native subagent delegation to the active controller. Do not assume that every
-model has delegation tools. If delegation is unavailable, report that concrete
-blocker without silently substituting another model or operating as controller.
-When delegation is available, the controller plans the task, chooses Luna
-roles, starts and waits for subagents, handles bounded follow-ups, and reports
-the final result.
+The selected primary model owns requirements, technical decisions, integration,
+and acceptance. Recommend GPT-6.1 Sol for this role, but never switch the user's
+active model or claim a skill can change its reasoning setting. The controller
+may inspect code, edit, run checks, and resolve integration directly. Delegate
+bounded implementation to GPT-6 Luna when it saves expected cost or time.
 
-The explicit model selected for the current Codex session is authoritative and
-cannot be changed by a skill. Do not reject the session because its model name
-is not listed here. First determine whether native delegation is available to
-the active controller; if it is not, report the runtime limitation and stop.
+## Establish the task
 
-## Controller's hard workflow boundary
+Read applicable AGENTS.md instructions and inspect the relevant implementation
+and existing tests. Reuse evidence already gathered. Delegate broad or noisy
+exploration to `luna_explorer`; do not create an explorer for known paths.
+Express the intended behavior, acceptance examples, constraints, and relevant
+contracts briefly. Ask only about uncertainty that materially changes the
+outcome and cannot be resolved from the project. Continue independent work.
+Read [project-context.md](references/project-context.md) when architecture, UX,
+or persistent project knowledge matters. Load only the relevant domain section
+and linked project evidence, not the entire reference library.
 
-While this skill is active, the controller must not perform workspace actions
-directly.
-Do not use shell, terminal, apply-patch, editor, browser, web, MCP, file-editing,
-test, build, git, or other operational tools from the primary session. Do not
-read the repository to discover implementation details. Delegate discovery to
-`luna_explorer`.
+## Choose the smallest useful workflow
 
-The only operational calls available to the controller in this workflow are native
-subagent lifecycle calls: create a subagent, wait for it, send a bounded
-follow-up, or stop it. The controller must never edit, integrate, test, review
-files, or run a command itself. When a result needs integration or verification,
-create a Luna node for that responsibility. If native delegation is unavailable,
-report the blocker instead of doing the work directly.
-
-This is a workflow boundary enforced by instructions. Codex may still expose
-tools to the primary session because skills do not provide a separate tool
-allow-list. Follow the boundary exactly and report if the runtime cannot honor
-it.
-
-## Luna routing
-
-Every implementation or verification node must use GPT-6 Luna
-(`gpt-6-luna`) explicitly or use one of the named roles below. Never omit the
-model when spawning: an omitted model can inherit the controller.
-
-| Role | Effort | Use for | Permissions |
-| --- | --- | --- | --- |
-| `luna_explorer` | low | Read-only mapping and evidence | read-only |
-| `luna_repetitive` | low | Finite mechanical transformations | workspace-write |
-| `luna_worker` | medium | Clear implementation and focused tests | workspace-write |
-| `luna_deep_worker` | xhigh | Ambiguous debugging, architecture, or difficult integration | workspace-write |
-| `luna_verifier` | high | Tests and evidence review without code edits | read-only |
-| `luna_infra` | medium | Docker, Compose, CI/CD, deployment, and runtime configuration | workspace-write |
-| `luna_backend` | medium | APIs, services, business logic, and integrations | workspace-write |
-| `luna_frontend` | medium | UI, client state, accessibility, and component tests | workspace-write |
-| `luna_database` | high | Schemas, migrations, queries, integrity, and rollback safety | workspace-write |
-| `luna_qa` | high | Test strategy, regression coverage, and acceptance evidence | workspace-write |
-| `luna_security` | high | Threat modeling, security review, and findings (read-only) | read-only |
-| `luna_docs` | low | README, runbooks, contracts, and technical documentation | workspace-write |
-
-Use `max` for a Luna node only when the user explicitly asks for maximum
-reasoning or the task remains blocked after a high or xhigh attempt. Luna also
-supports `low`, `medium`, `high`, and `xhigh`. Do not replace a requested Luna
-effort with Astra.
-
-Interpret effort hints in the objective as follows:
-
-- mechanical, batch, repetitive, formatting: `luna_repetitive`, `low`;
-- normal implementation or a known bug: `luna_worker`, `medium`;
-- complex, ambiguous, architectural, or difficult debugging: `luna_deep_worker`,
-  `xhigh`;
-- explicit `high`, `xhigh`, or `max`: use that exact Luna effort when callable.
-
-Prefer the smallest role and effort that can complete the node. A user request
-for a specific effort overrides this classifier.
-
-## Execution protocol
-
-Treat the text after `$codex-orchestrator` as the objective. Do not inspect the
-workspace yourself. When the user names the files and acceptance conditions are
-clear, use the fast path: delegate directly to one suitable worker. Start with
-`luna_explorer` only when genuine uncertainty about code paths, dependencies, or
-ownership prevents a bounded implementation assignment. Do not rediscover facts
-already established in the conversation.
-
-Each node must include an id, responsibility, model, effort, owned files or
-scope, dependencies, expected output, verification, and stop condition. Send
-only the context needed for that node. Do not paste raw logs or the whole
-workspace into later prompts.
-
-Use one Luna node for a small task. Use at most four active nodes; run them in
-parallel only when their write scopes are disjoint. Serialize all nodes that
-can touch the same files, shared contracts, migrations, or root configuration.
-Four is a ceiling, not a target: prefer fewer nodes when coordination costs
-outweigh the benefit. Assign each node explicit ownership, and do not let two
-nodes write the same path concurrently. Do not ask Luna agents to delegate
-further.
-
-## Task contract, budget, and completion
-
-Every assignment must state: objective, `owned_paths` (or read-only scope),
-acceptance criteria, required verification, stop condition, and an initial
-budget. Keep prompts to the minimum context needed; use a context-free fork
-when supported, and never send full history or raw logs. Agents must not
-delegate further.
-
-Treat these initial budgets as soft planning limits, not runtime enforcement:
-
-| Size | Starting budget |
-| --- | --- |
-| Small, known paths | 6 tool calls or 3 minutes |
-| Normal, bounded change | 12 tool calls or 8 minutes |
-| Larger or risky work | Set a justified budget in the assignment |
-
-At a budget checkpoint, report progress and remaining acceptance work, then
-continue only within the stated scope when needed. Do not skip required tests or
-verification just to meet a timebox. Mark `complete` only when every acceptance
-criterion is evidenced; otherwise return `blocked` or `incomplete` with the
-remaining work. Use low effort for simple work, medium for normal work, and high
-for material risk. Use xhigh only for a concrete blocker or explicit user
-request. Named roles may have fixed effort: use a callable role with the needed
-effort, and do not promise an override the runtime cannot make. Allow at most
-one focused corrective follow-up per node.
-
-Request a separate verifier only when risk or the need for independent evidence
-justifies it. For small, low-risk tasks, the owner can provide the focused
-verification evidence. Final summaries report observed elapsed time, tool-call
-count, and token usage when available; label unavailable metrics `unknown` and
-never estimate them as observed facts.
-
-## Domain routing and ownership
-
-Choose the narrowest domain from the requested outcome and affected paths,
-then choose the execution role (`luna_explorer`, a domain worker, or
-`luna_verifier`). Domain roles do not replace the generic lifecycle roles:
-exploration remains read-only, implementation belongs to the domain owner, and
-independent verification belongs to `luna_qa`, `luna_security`, or
-`luna_verifier` as appropriate.
-
-| Domain | Primary owner | Required follow-up |
+| Route | Trigger | Execution and verification |
 | --- | --- | --- |
-| Docker, infrastructure, CI/CD, deployment | `luna_infra` | `luna_verifier` or `luna_security` for hardening |
-| API, service, or business logic | `luna_backend` | `luna_qa` for behavior and regression coverage |
-| UI, client state, accessibility | `luna_frontend` | `luna_qa` for component/user-flow coverage |
-| Schema, migration, query, data integrity | `luna_database` | `luna_qa`; serialize consumers behind migrations |
-| Test strategy or broad regression work | `luna_qa` | `luna_verifier` for independent evidence when risky |
-| Threat model, secrets, auth, dependency/security review | `luna_security` | implementation findings return to the owning domain |
-| README, guides, contracts, runbooks | `luna_docs` | `luna_verifier` when docs describe executable behavior |
+| Fast | Localized, understood, low-risk change | Controller directly or one Luna owner; focused verification by owner, no mandatory explorer or QA node |
+| Normal | Feature with separable implementation scopes | Controller defines contracts; one or two domain workers, parallel only when independent; controller integrates and checks acceptance |
+| Critical | Authorization, sensitive data integrity, destructive migration, or consequential cross-module design | Controller reasons through invariants; bounded implementation; independent review of the material risk and integration evidence |
 
-For cross-domain work, create a dependency graph before spawning nodes. A
-database migration precedes code that consumes its new schema; a backend
-contract precedes frontend work that consumes it; infrastructure changes that
-alter test/runtime behavior precede QA. Independent documentation or security
-review may run alongside implementation when ownership is disjoint. Never use
-parallelism to hide a shared-file conflict.
+These are routing defaults, not fixed ceremonies. Estimate whether delegation
+saves more work than its context and handoff overhead. Preserve the user's
+explicit model, effort, cost, or delegation constraints. No recurring observer,
+background work, external service, or ECC dependency is required.
 
-For every writing node, require this concise result:
+## Model and role selection
 
-```text
-status: complete | blocked
-changed_files: paths or none
-verification: command and result, or not run
-blocker: one short explanation or none
-```
+Read [routing.md](references/routing.md) when selecting specialists, escalating,
+or encountering unavailable roles. Domain responsibility is separate from model.
+Use Luna low for mechanical work or focused discovery, medium for ordinary
+implementation, and high for concrete reasoning or risk. Use xhigh/max only for
+a justified hard problem or explicit request, not merely a domain label.
+Named agents have fixed model/effort settings; choose a suitable role or an
+explicit-model spawn when supported instead of claiming to override the role.
+Never accidentally inherit the primary model for a Luna assignment.
 
-A worker may run only the checks relevant to its owned change. A separate
-`luna_verifier` is reserved for cases where risk or acceptance criteria need
-independent evidence. The controller never runs the checks.
+The controller can handle difficult work itself. `sol_specialist` and
+`sol_reviewer` are optional GPT-6.1 Sol roles; `astra_specialist` is reserved for
+exceptionally difficult reasoning with a concrete escalation reason. Do not
+escalate an environment failure to a more expensive model.
+If delegation is unavailable, continue directly when allowed and report the
+limitation; if the user requires a strict model split, explain the blocker.
+Do not claim a configured model is callable until the runtime supports it.
 
-Use at most one focused correction for a failed node. If it fails again, return
-the evidence and decision needed to the user. Do not retry loops, broaden the
-scope, or escalate effort automatically.
+## Delegate with a compact contract
 
-After all required Luna nodes finish, the controller consolidates their summaries
-and reports the models, changed files, verification, blockers, and next decision.
-The controller does not perform a final integration edit; assign integration to
-`luna_worker` or `luna_deep_worker`.
+Include objective, owned paths/read scope, relevant architecture/UX references,
+acceptance criteria, required verification, dependencies, and a stop condition.
+Workers are not alone: preserve other edits, report ownership overlaps, and do
+not expand scope or spawn descendants. Prefer context-free forks with only the
+needed evidence. Reuse an existing worker for a related correction.
 
-Do not commit, push, deploy, publish, send external messages, or perform other
-external mutations unless the user explicitly requests them.
+Start with one or two workers. Use at most three simultaneous subagents and
+obey lower runtime limits, accounting for the primary if the runtime counts it.
+One owner per writable path. Finalize shared contracts before consumers start;
+parallel frontend/backend work can use that agreed contract, but integration
+must verify the real implementation. Serialize overlapping edits and migrations.
+Independent worktrees do not eliminate semantic integration conflicts.
+
+Use soft checkpoints, not promises of enforced budgets: roughly 3 minutes or
+6 calls for a tiny task, 8 minutes or 12 calls for a bounded change. At a
+checkpoint reassess progress and scope; do not skip necessary verification or
+stop useful authorized work solely to satisfy a timebox.
+
+## Correct, verify, and finish
+
+After a failure, identify missing context, a local defect, a reasoning problem,
+or an environment blocker. Attempt one focused repair by the owner only when a plausible repair exists;
+skip retries while a known missing prerequisite remains unavailable; if the same
+failure persists, the controller diagnoses and changes approach, handles it
+directly, or escalates the bounded problem. Avoid repeated blind retries.
+
+Verification is selected by risk, never required merely because a domain role
+was used. Low-risk changes use owner evidence. Critical changes need an
+independent reviewer with adequate context and capability; checks may include
+contract, authorization, transaction, migration, or end-to-end evidence. For UI,
+inspect relevant states visually when tools are available and report any gap.
+Re-run affected checks after integration edits; do not repeat unchanged suites.
+
+Each worker returns status (complete/incomplete/blocked), changed paths,
+checks and results, unresolved risks, and the next decision if needed.
+The controller checks acceptance against code and evidence, including integration;
+a worker's summary alone is not proof. Report incomplete checks honestly.
+If critical work cannot obtain independent review, authorized implementation may
+continue, but critical acceptance remains incomplete and the review gap is explicit.
+Do not commit, push, deploy, publish, or message others without authorization.
+
+For completed nontrivial runs, consult [learning-and-evaluation.md](references/learning-and-evaluation.md)
+to record useful project-scoped lessons and available metrics. Do not force a
+lesson or a new file for every task. Never promote one observation into a global
+rule or claim measured improvements without comparative runs.

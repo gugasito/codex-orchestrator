@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Orchestrator"
-  short_description: "Your selected model coordinates; Luna subagents do the work"
-  default_prompt: "Use $codex-orchestrator with your currently selected primary model as controller when native delegation is available, and delegate implementation, verification, and repetitive work to Luna."
+  short_description: "Adaptive Sol/Luna development with project architecture and UX"
+  default_prompt: "Use $codex-orchestrator to understand this software change, delegate focused work to Luna when useful, and verify the result against project architecture and UX."
