@@ -95,6 +95,14 @@ evidence, and return only decisions that exceed the authorized scope or cannot
 be inferred. Serialize overlapping edits and migrations. Independent worktrees
 do not eliminate semantic integration conflicts.
 
+When only agent replies remain, first do useful independent work, then use an
+event-aware wait near the upper supported interval (about 45–60 seconds when
+available) that wakes for a reply, completion, or blocker. Avoid short repeated
+polls and status-only updates. A timeout alone is not failure: if nothing
+changed, wait again within runtime limits; do not re-explore, prompt, spawn, or
+escalate solely because time elapsed. Address reported blockers promptly and
+share meaningful progress when it helps, without leaving useful updates stale.
+
 Use soft checkpoints, not promises of enforced budgets: roughly 3 minutes or
 6 calls for a tiny task, 8 minutes or 12 calls for a bounded change. At a
 checkpoint reassess progress and scope; do not skip necessary verification or

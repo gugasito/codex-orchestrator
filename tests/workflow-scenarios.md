@@ -34,3 +34,5 @@ aceptación de forma independiente. Usar la referencia learning-and-evaluation.
 | Tarea backend que encaja con rol de dominio | Luna backend implementa y verifica como único propietario; no entrega código a luna_worker |
 | Cambio acotado entre dominios sin consumidor separado | Un solo luna_worker implementa; no se encadena con agentes de dominio |
 | Instalación nueva tras retirar roles | Distribuye solo los 13 roles actuales; actualización no borra automáticamente roles antiguos |
+| Solo quedan respuestas de agentes pendientes | Tras trabajo independiente, usa espera por evento de 45–60 segundos cuando el runtime lo admita; evita sondeos breves y repetidos |
+| Una espera termina sin evento | La trata como timeout, no fallo; vuelve a esperar sin reexplorar, insistir al agente ni escalar solo por el tiempo transcurrido |
