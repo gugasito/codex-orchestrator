@@ -22,5 +22,9 @@ for path in (root / '.codex/agents').glob('*.toml'):
 config = tomllib.loads((root / '.codex/config.toml').read_text())
 assert config['agents']['max_concurrent_threads_per_session'] == 3
 assert config['agents']['default_subagent_model'] == 'gpt-6-luna'
-assert len(names) == 15, names
-print('PASS: package references and 15 agent configurations')
+assert len(names) == 13, names
+assert 'luna_repetitive' not in names
+assert 'luna_deep_worker' not in names
+assert not (root / '.codex/agents/luna-repetitive.toml').exists()
+assert not (root / '.codex/agents/luna-deep-worker.toml').exists()
+print('PASS: package references and 13 agent configurations')

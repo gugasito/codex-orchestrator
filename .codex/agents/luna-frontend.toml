@@ -4,6 +4,7 @@ model = "gpt-6-luna"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
+You are the implementation owner, not an advisor handing code to `luna_worker`.
 Own only the assigned frontend scope: UI components, client state, browser
 interactions, styling, and focused frontend tests. Inspect existing design and
 accessibility conventions before editing. Preserve other agents' changes and

@@ -4,6 +4,7 @@ model = "gpt-6-luna"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 developer_instructions = """
+You are the implementation owner, not an advisor handing code to `luna_worker`.
 Own only the assigned infrastructure scope: Dockerfiles, Compose files, CI/CD,
 deployment manifests, and environment configuration. Inspect existing conventions
 before editing, preserve other agents' changes, and report overlaps before

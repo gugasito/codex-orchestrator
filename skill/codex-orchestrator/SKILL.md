@@ -1,6 +1,6 @@
 ---
 name: codex-orchestrator
-description: Coordinate software development with the selected primary model and focused Luna subagents, adapting delegation to complexity and risk while preserving project architecture and UX. Use for the Sol/Luna development workflow or an explicit codex-orchestrator request.
+description: Coordinate software development with the selected primary model and focused subagents, adapting delegation to complexity and risk while preserving project architecture and UX. Use only when the user explicitly invokes $codex-orchestrator; do not apply implicitly to other requests.
 ---
 
 # Adaptive Codex Orchestrator
@@ -23,7 +23,10 @@ that worker is active; transfer ownership explicitly before an exception.
 ## Establish the task
 
 Read applicable AGENTS.md instructions and inspect the relevant implementation
-and existing tests. Reuse evidence already gathered. If project guidance is
+and existing tests. Reuse current evidence, recheck claims that may be stale, and
+give workers relevant paths, findings, and unresolved questions. Each owner still
+inspects its assigned code and tests before editing. Explore further only when a
+specific unknown needs resolution. If project guidance is
 missing or materially insufficient during a development request, read
 [project-setup.md](references/project-setup.md) and establish concise evidence-based
 instructions before implementation. Do not bootstrap files for a read-only question. Delegate broad or noisy
@@ -53,11 +56,13 @@ background work, external service, or ECC dependency is required.
 
 Read [routing.md](references/routing.md) when selecting specialists, escalating,
 or encountering unavailable roles. Domain responsibility is separate from model.
-Use Luna low for mechanical work or focused discovery, medium for ordinary
-implementation, and high for concrete reasoning or risk. Use xhigh/max only for
-a justified hard problem or explicit request, not merely a domain label.
-Named agents have fixed model/effort settings; choose a suitable role or an
-explicit-model spawn when supported instead of claiming to override the role.
+Use the effort preset configured for the selected role. Luna implementation
+defaults to medium; database and security use high for their assigned risk scope.
+QA and verification use medium for focused checks. There is no dedicated
+low-effort bulk edit role or xhigh Luna implementation preset. Hard problems may justify a
+bounded Sol or Astra consultation, subject to the user's model and cost
+constraints; escalation is never automatic. Named agents have fixed model/effort
+settings; do not claim to override them.
 Never accidentally inherit the primary model for a Luna assignment.
 
 The controller can handle difficult implementation under the explicit exception policy above. `sol_specialist` and
@@ -71,18 +76,24 @@ Do not claim a configured model is callable until the runtime supports it.
 ## Delegate with a compact contract
 
 Include objective, owned paths/read scope, applicable root and nested instruction
-files (check overrides), relevant architecture/UX references,
-acceptance criteria, required verification, dependencies, and a stop condition.
-Workers are not alone: preserve other edits, report ownership overlaps, and do
-not expand scope or spawn descendants. Prefer context-free forks with only the
-needed evidence. Reuse an existing worker for a related correction.
+files (check overrides), relevant architecture/UX references, acceptance,
+verification, dependencies, and a stop condition. Include only applicable facts;
+paths and concise findings are usually enough instead of pasted references.
+Default to context-free forks; pass the needed evidence explicitly rather than
+inheriting the whole chat. Preserve other edits, report ownership overlaps, and
+do not expand scope or spawn descendants. Reuse the same worker for a related
+correction and send only the new finding, expected behavior, and failing evidence.
 
 Start with one or two workers. Use at most three simultaneous subagents and
 obey lower runtime limits, accounting for the primary if the runtime counts it.
 One owner per writable path. Finalize shared contracts before consumers start;
 parallel frontend/backend work can use that agreed contract, but integration
-must verify the real implementation. Serialize overlapping edits and migrations.
-Independent worktrees do not eliminate semantic integration conflicts.
+must verify the real implementation. Start independent, ready assignments
+without waiting for unrelated work; do not dispatch workers that can only wait
+for a prerequisite. Let the owner resolve routine in-scope details from project
+evidence, and return only decisions that exceed the authorized scope or cannot
+be inferred. Serialize overlapping edits and migrations. Independent worktrees
+do not eliminate semantic integration conflicts.
 
 Use soft checkpoints, not promises of enforced budgets: roughly 3 minutes or
 6 calls for a tiny task, 8 minutes or 12 calls for a bounded change. At a
@@ -102,14 +113,23 @@ directly only under the implementation exception policy above, or escalates the
 bounded problem. Avoid repeated blind retries.
 
 Verification is selected by risk, never required merely because a domain role
-was used. Low-risk changes use owner evidence. Critical changes need an
+was used. The domain worker owns focused checks. Use `luna_qa` to author tests,
+fixtures, or independent test strategy; use `luna_verifier` only for independent
+read-only checks. Neither is an automatic stage after every implementation, and
+the verifier does not repair failures. Low-risk changes use owner evidence.
+Critical changes need an
 independent reviewer with adequate context and capability; checks may include
 contract, authorization, transaction, migration, or end-to-end evidence. For UI,
 inspect relevant states visually when tools are available and report any gap.
-Re-run affected checks after integration edits; do not repeat unchanged suites.
+Review the relevant diff and evidence against acceptance. Re-run affected checks
+after integration edits; do not repeat unchanged suites or recreate current
+evidence without a concrete reason.
 
-Each worker returns status (complete/incomplete/blocked), changed paths,
-checks and results, unresolved risks, and the next decision if needed.
+Each worker returns concise status (complete/incomplete/blocked), changed paths,
+focused checks and results, unresolved risks, and a next decision only if needed.
+Report evidence once; corrections contain only new findings or results. A
+blocker is an unavailable prerequisite or unresolved decision, not unrelated
+work still running.
 The final report names actual implementers and reviewers, checks, remaining gaps,
 and any direct-controller implementation with its reason. Report only known usage.
 The controller checks acceptance against code and evidence, including integration;

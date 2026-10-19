@@ -9,6 +9,9 @@ no necesita ECC ni un servicio externo.
 
 ## Uso
 
+La skill se activa solo cuando la invocas expresamente con `$codex-orchestrator`;
+no debe aplicarse implícitamente a otras solicitudes.
+
 ```text
 $codex-orchestrator agrega cancelación de pedidos respetando la arquitectura y UX del proyecto
 ```
@@ -20,10 +23,13 @@ puede usar uno o dos workers. Los cambios críticos requieren revisión
 independiente del riesgo relevante. No hay una cadena obligatoria de explorador,
 implementador, QA y verificador.
 
-Se recomienda GPT-6.1 Sol como principal. La selección activa del usuario manda:
-la skill no cambia el modelo ni el esfuerzo de una sesión abierta. Los defaults
-del proyecto son Sol medium, Luna medium y un máximo de tres subagentes; el
-runtime puede imponer un límite menor. El instalador conserva el config global.
+Se recomienda GPT-6.1 Sol como modelo principal para orquestar; la selección
+activa del usuario manda y la skill no cambia el modelo ni el esfuerzo de una
+sesión abierta. Los subagentes usan GPT-6 Luna por defecto, GPT-6.1 Sol para
+especialización o revisión, y GPT-6 Astra para escalamiento excepcional,
+según el rol y la dificultad. Los defaults del proyecto son Sol medium, Luna
+medium y un máximo de tres subagentes; el runtime puede imponer un límite menor.
+El instalador conserva el config global.
 
 ## Instalación y actualización
 
@@ -36,8 +42,9 @@ runtime puede imponer un límite menor. El instalador conserva el config global.
 ```
 
 El destino es `${CODEX_HOME:-$HOME/.codex}`; `--target DIR` permite otra raíz de
-configuración. Se instalan la skill, sus referencias y quince agentes. No se
-modifica `config.toml` ni se eliminan archivos ajenos. Sin `--update`, un archivo
+configuración. Se instalan la skill, sus referencias y trece agentes. No se
+modifica `config.toml` ni se eliminan archivos ajenos o roles de instalaciones
+previas. Sin `--update`, un archivo
 diferente bloquea la copia antes de escribir; `--update` reemplaza los archivos
 administrados. Conserva una copia de tus personalizaciones antes de actualizar.
 Abre un chat nuevo para que Codex descubra las instrucciones y roles actualizados.
@@ -49,10 +56,15 @@ exija una separación estricta de modelos. No afirma haber delegado si no ocurri
 
 ## Roles y esfuerzo
 
-Los doce roles Luna existentes se conservan: explorer, repetitive, worker,
-deep_worker, verifier, infra, backend, frontend, database, qa, security y docs,
-todos con prefijo `luna_`. Se añaden `sol_specialist`, `sol_reviewer` y
-`astra_specialist` para escalamiento justificado. No se activan todos a la vez.
+Se distribuyen diez roles Luna: explorer, worker, verifier, infra, backend,
+frontend, database, qa, security y docs. `luna_worker` es propietario alternativo
+para tareas sin dominio claro o cambios acotados entre dominios; no es una etapa
+adicional tras un especialista. Los roles backend, frontend, database e infra
+implementan y verifican su propio alcance. Ya no se distribuyen los roles de
+ediciones repetitivas de bajo esfuerzo ni el rol Luna xhigh; instalaciones
+anteriores pueden conservarlos hasta que se limpien explícitamente. Se añaden
+`sol_specialist`, `sol_reviewer` y `astra_specialist` para escalamiento
+justificado. No se activan todos a la vez.
 
 El dominio y el modelo son decisiones distintas. Los archivos de agentes fijan
 modelo y esfuerzo; para otra combinación se necesita un spawn explícito

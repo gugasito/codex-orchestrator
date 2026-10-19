@@ -11,9 +11,7 @@ source_files=(
   'skill/codex-orchestrator/references/routing.md'
   'skill/codex-orchestrator/references/project-setup.md'
   '.codex/agents/luna-worker.toml'
-  '.codex/agents/luna-repetitive.toml'
   '.codex/agents/luna-explorer.toml'
-  '.codex/agents/luna-deep-worker.toml'
   '.codex/agents/luna-verifier.toml'
   '.codex/agents/luna-infra.toml'
   '.codex/agents/luna-backend.toml'
@@ -34,9 +32,7 @@ destination_files=(
   'skills/codex-orchestrator/references/routing.md'
   'skills/codex-orchestrator/references/project-setup.md'
   'agents/luna-worker.toml'
-  'agents/luna-repetitive.toml'
   'agents/luna-explorer.toml'
-  'agents/luna-deep-worker.toml'
   'agents/luna-verifier.toml'
   'agents/luna-infra.toml'
   'agents/luna-backend.toml'
@@ -85,10 +81,15 @@ rg -Fq "$target/skills/codex-orchestrator" "$dry_run_output" || fail 'dry-run om
 assert_installed_fidelity "$target"
 cmp -s "$config_before" "$target/config.toml" || fail 'copy modified unrelated config.toml'
 
+printf 'legacy custom agent\n' >"$target/agents/luna-repetitive.toml"
+printf 'legacy custom agent\n' >"$target/agents/luna-deep-worker.toml"
 snapshot="$temp_root/snapshot"
 cp -R "$target" "$snapshot"
 "$install_script" --copy --target "$target" >/dev/null
 diff -r "$snapshot" "$target" >/dev/null || fail 'identical rerun changed destination'
+"$install_script" --copy --update --target "$target" >/dev/null
+[[ "$(cat "$target/agents/luna-repetitive.toml")" == 'legacy custom agent' ]] || fail 'update deleted an unmanaged legacy role'
+[[ "$(cat "$target/agents/luna-deep-worker.toml")" == 'legacy custom agent' ]] || fail 'update deleted an unmanaged legacy role'
 
 conflict_target="$temp_root/conflict"
 mkdir -p "$conflict_target/skills/codex-orchestrator"

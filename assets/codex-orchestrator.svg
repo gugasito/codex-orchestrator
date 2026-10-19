@@ -104,16 +104,16 @@
     <circle cx="806" cy="194" r="5" fill="#8fc6ff"/>
   </g>
 
-  <!-- Luna repetitive worker -->
+  <!-- Luna domain implementation owner -->
   <g font-family="Arial, Helvetica, sans-serif">
     <polygon points="806,344 831,320 1136,320 1160,344 1160,460 1136,484 831,484 806,460" fill="#102b2d" stroke="#56e2c1" stroke-width="2"/>
     <rect x="833" y="345" width="9" height="113" fill="#56e2c1"/>
     <circle cx="868" cy="358" r="6" fill="#56e2c1"/>
-    <text x="889" y="363" fill="#7df1d0" font-size="11" font-weight="700" letter-spacing="2">WORKER / 03</text>
+    <text x="889" y="363" fill="#7df1d0" font-size="11" font-weight="700" letter-spacing="2">DOMAIN OWNER / 03</text>
     <text x="868" y="409" fill="#f2f7ff" font-size="21" font-weight="700" letter-spacing="0.8">GPT-6 LUNA</text>
-    <text x="868" y="436" fill="#a7c9c7" font-size="14">repetitive work · low</text>
+    <text x="868" y="436" fill="#a7c9c7" font-size="14">focused implementation · checks</text>
     <rect x="1014" y="447" width="108" height="25" fill="#18504e"/>
-    <text x="1037" y="464" fill="#8af3d2" font-size="11" font-weight="700" letter-spacing="1">ITERATE</text>
+    <text x="1035" y="464" fill="#8af3d2" font-size="11" font-weight="700" letter-spacing="1">IMPLEMENT</text>
     <path d="M806 401H788" fill="none" stroke="#56e2c1" stroke-width="3"/>
     <circle cx="806" cy="401" r="5" fill="#56e2c1"/>
   </g>
@@ -139,7 +139,7 @@
     <circle cx="218" cy="550" r="5" fill="#8fc6ff"/>
     <text x="233" y="555" fill="#9bb0c3" font-size="12" letter-spacing="0.8">LUNA BUILDS</text>
     <circle cx="360" cy="550" r="5" fill="#56e2c1"/>
-    <text x="375" y="555" fill="#9bb0c3" font-size="12" letter-spacing="0.8">LUNA ITERATES</text>
+    <text x="375" y="555" fill="#9bb0c3" font-size="12" letter-spacing="0.8">DOMAIN OWNS WORK</text>
     <circle cx="547" cy="550" r="5" fill="#d7a95b"/>
     <text x="562" y="555" fill="#9bb0c3" font-size="12" letter-spacing="0.8">EVIDENCE RETURNS</text>
     <text x="1148" y="555" text-anchor="end" fill="#526d84" font-size="11" letter-spacing="1.2">NATIVE CODEX SUBAGENTS</text>
